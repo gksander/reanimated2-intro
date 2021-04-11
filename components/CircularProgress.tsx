@@ -9,19 +9,22 @@ import { StyleSheet, TextInput, View } from "react-native";
 import { clamp } from "../utils/clamp";
 import { COLOR } from "../consts";
 
+/**
+ * Make Circle and TextInput animatable.
+ */
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const AnimatedInput = Animated.createAnimatedComponent(TextInput);
 
 type CircularProgressProps = {
   progress: Animated.SharedValue<number>;
-  barWidth: Animated.SharedValue<number>;
+  sliderWidth: Animated.SharedValue<number>;
   radius?: number;
   strokeWidth?: number;
 };
 
 export const CircularProgress: React.FC<CircularProgressProps> = ({
   progress,
-  barWidth,
+  sliderWidth,
   radius = 100,
   strokeWidth = 10,
 }) => {
@@ -33,7 +36,7 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
    * Animated input props
    */
   const animatedInputProps = useAnimatedProps(() => {
-    const percentComplete = clamp(progress.value / barWidth.value, 0, 1);
+    const percentComplete = clamp(progress.value / sliderWidth.value, 0, 1);
 
     return {
       text: `${Math.round(100 * percentComplete)}`,
@@ -49,7 +52,7 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
    * Animated progress props. Animate strokeDashOffset to handle animation
    */
   const animatedProgressProps = useAnimatedProps(() => {
-    const percentComplete = clamp(progress.value / barWidth.value, 0, 1);
+    const percentComplete = clamp(progress.value / sliderWidth.value, 0, 1);
     return {
       strokeDashoffset: (1 - percentComplete) * CIRCUMFERENCE,
     };
@@ -59,9 +62,9 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
    * Animated BG props. Animate color/opacity.
    */
   const animatedBgProps = useAnimatedProps(() => {
-    const percentComplete = clamp(progress.value / barWidth.value, 0, 1);
+    const percentComplete = clamp(progress.value / sliderWidth.value, 0, 1);
     return {
-      fillOpacity: interpolate(percentComplete, [0, 1], [0.4, 0.75]),
+      fillOpacity: interpolate(percentComplete, [0, 1], [0.2, 0.75]),
     };
   });
 

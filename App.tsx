@@ -5,7 +5,11 @@ import { useSharedValue } from "react-native-reanimated";
 import { Slider } from "./components/Slider";
 
 const App: React.FC = () => {
-  const barWidth = useSharedValue(0);
+  /**
+   * Keep track of slider width (we'll measure that),
+   * and progress (which we'll manage with gestures)
+   */
+  const sliderWidth = useSharedValue(0);
   const progress = useSharedValue(0);
 
   return (
@@ -23,18 +27,18 @@ const App: React.FC = () => {
               alignItems: "center",
             }}
           >
-            <CircularProgress {...{ progress, barWidth }} />
+            <CircularProgress {...{ progress, sliderWidth }} />
           </View>
         </View>
         <View
           style={{
-            paddingHorizontal: 20,
+            paddingHorizontal: 40,
             paddingVertical: 20,
-            height: 100,
+            height: 80,
             marginBottom: 20,
           }}
         >
-          <Slider {...{ barWidth, progress }} />
+          <Slider {...{ sliderWidth, progress }} />
         </View>
       </SafeAreaView>
     </View>

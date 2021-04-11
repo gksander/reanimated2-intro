@@ -12,29 +12,45 @@ import { COLOR } from "../consts";
 import { View } from "react-native";
 
 type SliderProps = {
-  barWidth: Animated.SharedValue<number>;
+  sliderWidth: Animated.SharedValue<number>;
   progress: Animated.SharedValue<number>;
 };
 
-export const Slider: React.FC<SliderProps> = ({ barWidth, progress }) => {
-  const gestureHandler = useAnimatedGestureHandler<
+/**
+ * Custom slider control that uses gesture handlers
+ */
+export const Slider: React.FC<SliderProps> = ({ sliderWidth, progress }) => {
+  /**
+   * Create animated handler for pan gesture.
+   */
+  const panGestureHandler = useAnimatedGestureHandler<
     PanGestureHandlerGestureEvent,
-    { startX: number }
+    { startProgress: number }
   >({
+    // On start, keep track of starting progress value.
     onStart: (_, ctx) => {
-      ctx.startX = progress.value;
+      ctx.startProgress = progress.value;
     },
+    // On pan, new progress is the starting progress plus (change in position)
     onActive: (event, ctx) => {
-      progress.value = ctx.startX + event.translationX;
+      progress.value = ctx.startProgress + event.translationX;
     },
+    // On pan-end, snap back to 0 or barWidth if out of bounds.
     onEnd: () => {
-      progress.value = withSpring(0);
+      if (progress.value > sliderWidth.value) {
+        progress.value = withSpring(sliderWidth.value);
+      } else if (progress.value < 0) {
+        progress.value = withSpring(0);
+      }
     },
   });
 
-  const barHandleStyle = useAnimatedStyle(() => {
+  /**
+   * Animated style for handle, translated based on progress.
+   */
+  const animatedHandleStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ translateX: progress.value }],
+      transform: [{ translateX: progress.value - HANDLE_WIDTH / 2 }],
     };
   });
 
@@ -47,24 +63,26 @@ export const Slider: React.FC<SliderProps> = ({ barWidth, progress }) => {
         borderRadius: 10,
       }}
       onLayout={(e) => {
-        barWidth.value = e.nativeEvent.layout.width;
+        sliderWidth.value = e.nativeEvent.layout.width;
       }}
     >
-      <PanGestureHandler onGestureEvent={gestureHandler}>
+      <PanGestureHandler onGestureEvent={panGestureHandler}>
         <Animated.View
           style={[
             {
-              width: 20,
+              width: HANDLE_WIDTH,
               backgroundColor: COLOR,
               borderRadius: 10,
               position: "absolute",
               bottom: -20,
               top: -20,
             },
-            barHandleStyle,
+            animatedHandleStyle,
           ]}
         />
       </PanGestureHandler>
     </View>
   );
 };
+
+const HANDLE_WIDTH = 20;
